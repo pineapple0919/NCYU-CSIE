@@ -13,6 +13,7 @@ jobs:
   # 1. 執行 Coding Test 階段
   run-test:
     runs-on: ubuntu-latest
+    # 修改 .github/workflows/ci-cd.yml 中的 run-test 區塊
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,12 +23,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Run Test Script
-        run: |
-          # 如果你的資料夾裡有寫好的測試檔（例如 test.js 或包含測試的 v2.js）
-          # 這裡我們預設執行本地的測試指令。如果目前還沒有，它會先印出 Log
-          echo "🚀 正在執行自動化 Coding Test..."
-          node test.js (未來測試檔案的路徑)
+      # 💡 新增這步：告訴雲端機器人根據 package.json 安裝 Jest 測試環境
+      - name: Install dependencies
+        run: npm install
+
+      # 💡 修改這步：讓機器人執行 npm test (也就是啟動 Jest 跑 test.js)
+      - name: Run Jest Test Suite
+        run: npm test
 
   # 2. 部署到 GitHub Pages 階段
   deploy:

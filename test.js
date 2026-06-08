@@ -1,54 +1,150 @@
-// test.js
-const assert = require('assert');
+/**
+ * @jest-environment jsdom
+ */
+
 const fs = require('fs');
 const path = require('path');
 
-// 讀取原本的 script.js 內容
-const scriptCode = fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8');
+describe('網頁計算機 V1 核心邏輯功能測試', () => {
 
-// 模擬瀏覽器環境的 DOM 物件，避免 script.js 報錯
-global.document = {
-    getElementById: () => ({ innerText: '' })
-};
+    beforeEach(() => {
+        // 1. 初始化模擬瀏覽器的 DOM 結構
+        document.body.innerHTML = `<div id="display"></div>`;
 
-// 執行 script.js 的程式碼，將函式載入到 Node.js 全域環境中
-eval(scriptCode);
+        // 2. 讀取並動態載入 script.js 的內容
+        const scriptPath = path.join(__dirname, 'script.js');
+        const scriptCode = fs.readFileSync(scriptPath, 'utf8');
+        
+        // 3. 關鍵魔法：利用 Function 執行並將環境對象強行注入 global
+        // 這能確保 let 變數和 function 能被測試案例直接讀取，且每次測試前都徹底重置
+        const runInGlobal = new Function(`
+            with (global) {
+                ${scriptCode}
+                // 將方法與變數顯示掛載到 global，讓測試案例直接叫得到
+                global.appendNumber = appendNumber;
+                global.setOperator = setOperator;
+                global.calculate = calculate;
+                global.clearDisplay = clearDisplay;
+            }
+        `);
+        runInGlobal();
 
-console.log("🚀 開始執行計算機核心邏輯自動化測試 (Coding Test)...");
+        // 4. 每題開始前，初始化清除狀態
+        clearDisplay();
+    });
 
-try {
-    // 測試案例 1：測試基本加法 (7 + 8 = 15)
-    clearDisplay();
-    appendNumber('7');
-    setOperator('+');
-    appendNumber('8');
-    calculate();
-    assert.strictEqual(currentInput, '15', '❌ 測試失敗：7 + 8 應該要等於 15');
-    console.log("✅ Test 1 Passed: 7 + 8 = 15");
+    // ==========================================
+    // 2. 基礎功能測試套件 (Basic Functionality)
+    // ==========================================
+    describe('【基礎功能測試】', () => {
 
-    // 測試案例 2：測試基本減法 (9 - 4 = 5)
-    clearDisplay();
-    appendNumber('9');
-    setOperator('-');
-    appendNumber('4');
-    calculate();
-    assert.strictEqual(currentInput, '5', '❌ 測試失敗：9 - 4 應該要等於 5');
-    console.log("✅ Test 2 Passed: 9 - 4 = 5");
+        test('TC-V1-01: 正常的加法運算 (5 + 3 = 8)', () => {
+            appendNumber('5');
+            setOperator('+');
+            appendNumber('3');
+            calculate();
 
-    // 測試案例 3：錯誤情境測試（未輸入完整就按等號）
-    clearDisplay();
-    appendNumber('5');
-    calculate();
-    // 這裡模擬觸發錯誤時，你的邏輯會將狀態重置或不正確
-    // 依據 script.js 邏輯，出錯時會將變數清空
-    assert.strictEqual(currentInput, '', '❌ 測試失敗：錯誤算式應清空 currentInput');
-    console.log("✅ Test 3 Passed: 錯誤處理符合預期");
+            expect(document.getElementById('display').innerText).toBe('8');
+        });
 
-    console.log("\n🎉 所有自動化測試全部通過！程式碼安全無誤。");
-    process.exit(0); // 告訴 GitHub Actions 測試成功
+        test('TC-V1-02: 正常的減法運算 (10 - 4 = 6)', () => {
+            appendNumber('1');
+            appendNumber('0');
+            setOperator('-');
+            appendNumber('4');
+            calculate();
 
-} catch (error) {
-    console.error("\n❌ 自動化測試失敗！");
-    console.error(error.message);
-    process.exit(1); // 告訴 GitHub Actions 測試失敗，阻擋 Merge
-}
+            expect(document.getElementById('display').innerText).toBe('6');
+        });
+
+        test('TC-V1-03: 多位數連續輸入測試 (1024)', () => {
+            appendNumber('1');
+            appendNumber('0');
+            appendNumber('2');
+            appendNumber('4');
+
+            expect(document.getElementById('display').innerText).toBe('1024');
+        });
+
+        test('TC-V1-04: Clear (C) 按鍵重置功能', () => {
+            appendNumber('9');
+            setOperator('+');
+            appendNumber('9');
+            clearDisplay();
+
+            expect(document.getElementById('display').innerText).toBe('');
+        });
+    });
+
+    // ==========================================
+    // 3. 異常與邊界條件測試套件 (Edge Cases & Error Handling)
+    // ==========================================
+    describe('【異常與邊界條件測試】', () => {
+
+        test('TC-V1-05: 空畫面直接按等號應顯示錯誤', () => {
+            calculate();
+            expect(document.getElementById('display').innerText).toBe('錯誤');
+        });
+
+        test('TC-V1-06: 不完整算式直接按等號（有數字、有符號、無第二數字）應顯示錯誤', () => {
+            appendNumber('7');
+            setOperator('+');
+            calculate();
+
+            expect(document.getElementById('display').innerText).toBe('錯誤');
+        });
+
+        test('TC-V1-07: 空畫面下直接點選運算符號不應有任何連帶反應', () => {
+            setOperator('-'); 
+            appendNumber('5');
+            calculate(); 
+            expect(document.getElementById('display').innerText).toBe('錯誤');
+        });
+
+        test('TC-V1-08: 畫面上顯示「錯誤」時，重新輸入數字應自動清除錯誤狀態並顯示新數字', () => {
+            calculate(); 
+            expect(document.getElementById('display').innerText).toBe('錯誤');
+
+            appendNumber('9'); 
+
+            expect(document.getElementById('display').innerText).toBe('9');
+        });
+
+        test('TC-V1-09: 數字 0 的邊界輸入處理', () => {
+            appendNumber('0');
+            appendNumber('0');
+            appendNumber('0');
+
+            expect(document.getElementById('display').innerText).toBe('000'); 
+        });
+    });
+
+    // ==========================================
+    // 4. 進階與邏輯重構準備測試套件 (Advanced Logical Tests)
+    // ==========================================
+    describe('【進階複合運算測試】', () => {
+
+        test('TC-V1-10: 負數運算結果測試 (3 - 8 = -5)', () => {
+            appendNumber('3');
+            setOperator('-');
+            appendNumber('8');
+            calculate();
+
+            expect(document.getElementById('display').innerText).toBe('-5');
+        });
+
+        test('TC-V1-11: 運算結果作為下一次運算的起點 (5 + 5 = 10, 10 - 3 = 7)', () => {
+            appendNumber('5');
+            setOperator('+');
+            appendNumber('5');
+            calculate(); 
+            expect(document.getElementById('display').innerText).toBe('10');
+
+            setOperator('-');
+            appendNumber('3');
+            calculate();
+
+            expect(document.getElementById('display').innerText).toBe('7');
+        });
+    });
+});
