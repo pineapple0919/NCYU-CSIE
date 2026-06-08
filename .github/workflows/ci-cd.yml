@@ -1,0 +1,45 @@
+name: Automation Testing and Deployment
+
+on:
+  pull_request:
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  # 1. 執行 Coding Test 階段
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run Test Script
+        run: |
+          # 如果你的資料夾裡有寫好的測試檔（例如 test.js 或包含測試的 v2.js）
+          # 這裡我們預設執行本地的測試指令。如果目前還沒有，它會先印出 Log
+          echo "🚀 正在執行自動化 Coding Test..."
+          node test.js (未來測試檔案的路徑)
+
+  # 2. 部署到 GitHub Pages 階段
+  deploy:
+    needs: run-test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./ # 部署根目錄下的 index.html
