@@ -1,15 +1,13 @@
-/* 基本網頁重置與置中排版 */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center; 
     height: 100vh;
     background-color: #2c3e50;
     margin: 0;
 }
 
-/* 計算機外觀主體 */
 .calculator {
     background-color: #ecf0f1;
     padding: 20px;
@@ -18,7 +16,6 @@ body {
     width: 280px;
 }
 
-/* 顯示螢幕 */
 .display {
     background-color: #34495e;
     color: #ecf0f1;
@@ -32,14 +29,12 @@ body {
     word-wrap: break-word;
 }
 
-/* 九宮格按鍵區 */
 .keypad {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 12px;
 }
 
-/* 統一按鈕樣式 */
 button {
     font-size: 22px;
     padding: 15px;
@@ -58,7 +53,6 @@ button:active {
     transform: translateY(4px);
 }
 
-/* 運算符號按鈕特化 */
 .operator {
     background-color: #f39c12;
     color: white;
@@ -69,19 +63,12 @@ button:active {
     box-shadow: 0 0 #d68910;
 }
 
-/* 清除按鈕特化 */
 .clear {
     background-color: #e74c3c;
     color: white;
     box-shadow: 0 4px #c0392b;
-    grid-column: span 2; 
 }
 
 .clear:active {
     box-shadow: 0 0 #c0392b;
-}
-
-/* 數字 0 按鈕特化 */
-.zero {
-    grid-column: span 2; /* 讓 0 佔據兩格 */
 }

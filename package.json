@@ -1,0 +1,25 @@
+{
+  "name": "ncyu-csie",
+  "version": "1.0.0",
+  "description": "這是一個使用 **HTML、CSS、JavaScript** 製作的網頁版計算機專案。  \r 專案提供簡潔的計算機介面，支援基本四則運算，並加入除以零的錯誤處理機制。",
+  "main": "script.js",
+  "scripts": {
+    "test": "npx jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pineapple0919/NCYU-CSIE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/pineapple0919/NCYU-CSIE/issues"
+  },
+  "homepage": "https://github.com/pineapple0919/NCYU-CSIE#readme",
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1"
+  }
+}
