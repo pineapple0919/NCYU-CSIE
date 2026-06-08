@@ -1,0 +1,11 @@
+# 忽略 Node.js 依賴套件套件庫庫
+node_modules/
+package-lock.json
+
+# 忽略本地環境變數敏感檔案
+.env
+.env.local
+
+# 忽略作業系統產生的垃圾檔案
+.DS_Store
+Thumbs.db
