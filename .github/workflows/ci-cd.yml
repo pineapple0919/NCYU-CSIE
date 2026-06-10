@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-        # 💡 終極解法：在跑測試前，強行把 node_modules 內所有執行檔的權限開通（可執行 +x）
+      # 💡 終極解法：在跑測試前，強行把 node_modules 內所有執行檔的權限開通（可執行 +x）
       - name: Fix Node Binaries Permissions
         run: chmod -R +x node_modules/.bin
 
@@ -44,8 +44,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 💡 關鍵優化：在部署前，把沒用的 node_modules 刪掉，避免肥大的測試套件被一起傳上網頁端
+      - name: Remove Node Modules before deploy
+        run: rm -rf node_modules
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./ # 部署根目錄下的 index.html
+          publish_dir: ./

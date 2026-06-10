@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-describe('網頁計算機 V1 核心邏輯功能測試', () => {
+describe('網頁計算機 V3 核心邏輯與進階運算功能測試', () => {
 
     beforeEach(() => {
         // 1. 初始化模擬瀏覽器的 DOM 結構
@@ -16,15 +16,15 @@ describe('網頁計算機 V1 核心邏輯功能測試', () => {
         const scriptCode = fs.readFileSync(scriptPath, 'utf8');
         
         // 3. 關鍵魔法：利用 Function 執行並將環境對象強行注入 global
-        // 這能確保 let 變數和 function 能被測試案例直接讀取，且每次測試前都徹底重置
         const runInGlobal = new Function(`
             with (global) {
                 ${scriptCode}
-                // 將方法與變數顯示掛載到 global，讓測試案例直接叫得到
+                // 將 V3 方法與變數掛載到 global，讓測試案例直接調用
                 global.appendNumber = appendNumber;
                 global.setOperator = setOperator;
                 global.calculate = calculate;
                 global.clearDisplay = clearDisplay;
+                global.applyAdvanced = applyAdvanced;
             }
         `);
         runInGlobal();
@@ -34,117 +34,166 @@ describe('網頁計算機 V1 核心邏輯功能測試', () => {
     });
 
     // ==========================================
-    // 2. 基礎功能測試套件 (Basic Functionality)
+    // 1. 基礎四則運算功能測試套件 (Basic Functionality)
     // ==========================================
-    describe('【基礎功能測試】', () => {
+    describe('【基礎四則運算功能測試】', () => {
 
-        test('TC-V1-01: 正常的加法運算 (5 + 3 = 8)', () => {
-            appendNumber('5');
+        test('TC-V3-01: 正常的加法與乘法運算測試', () => {
+            appendNumber('8');
             setOperator('+');
+            appendNumber('2');
+            calculate();
+            expect(document.getElementById('display').innerText).toBe('10');
+
+            clearDisplay();
+            appendNumber('6');
+            setOperator('*');
             appendNumber('3');
             calculate();
-
-            expect(document.getElementById('display').innerText).toBe('8');
+            expect(document.getElementById('display').innerText).toBe('18');
         });
 
-        test('TC-V1-02: 正常的減法運算 (10 - 4 = 6)', () => {
-            appendNumber('1');
-            appendNumber('0');
+        test('TC-V3-02: 正常的減法與除法運算測試', () => {
+            appendNumber('9');
             setOperator('-');
             appendNumber('4');
             calculate();
+            expect(document.getElementById('display').innerText).toBe('5');
 
-            expect(document.getElementById('display').innerText).toBe('6');
-        });
-
-        test('TC-V1-03: 多位數連續輸入測試 (1024)', () => {
-            appendNumber('1');
-            appendNumber('0');
+            clearDisplay();
+            appendNumber('8');
+            setOperator('/');
             appendNumber('2');
-            appendNumber('4');
-
-            expect(document.getElementById('display').innerText).toBe('1024');
+            calculate();
+            expect(document.getElementById('display').innerText).toBe('4');
         });
 
-        test('TC-V1-04: Clear (C) 按鍵重置功能', () => {
+        test('TC-V3-03: Clear (C) 按鍵重置功能應回歸預設值 0', () => {
             appendNumber('9');
             setOperator('+');
-            appendNumber('9');
+            appendNumber('5');
             clearDisplay();
-
-            expect(document.getElementById('display').innerText).toBe('');
+            // V3 功能需求：沒有值時顯示 '0'
+            expect(document.getElementById('display').innerText).toBe('0');
         });
     });
 
     // ==========================================
-    // 3. 異常與邊界條件測試套件 (Edge Cases & Error Handling)
+    // 2. V3 新增功能：小數點與連續運算測試 (New Features)
     // ==========================================
-    describe('【異常與邊界條件測試】', () => {
+    describe('【小數點與自動連續運算測試】', () => {
 
-        test('TC-V1-05: 空畫面直接按等號應顯示錯誤', () => {
+        test('TC-V3-04: 正常小數點輸入與運算 (1.5 + 2.5 = 4)', () => {
+            appendNumber('1');
+            appendNumber('.');
+            appendNumber('5');
+            setOperator('+');
+            appendNumber('2');
+            appendNumber('.');
+            appendNumber('5');
+            calculate();
+            expect(document.getElementById('display').innerText).toBe('4');
+        });
+
+        test('TC-V3-05: 異常小數點輸入限制（同一組數字不允許重複輸入小數點）', () => {
+            appendNumber('1');
+            appendNumber('.');
+            appendNumber('.'); // 重複輸入應被忽略
+            appendNumber('5');
+            expect(document.getElementById('display').innerText).toBe('1.5');
+        });
+
+        test('TC-V3-06: 連續運算功能測試 (1 + 2 + 3 = 6，不按等號直接按運算子)', () => {
+            appendNumber('1');
+            setOperator('+');
+            appendNumber('2');
+            setOperator('+'); // 此時應自動觸發前面的計算並更新，將 3 作為下一步
+            appendNumber('3');
+            calculate();
+            expect(document.getElementById('display').innerText).toBe('6');
+        });
+    });
+
+    // ==========================================
+    // 3. V3 新增功能：進階科學運算測試 (Advanced Operations)
+    // ==========================================
+    describe('【進階功能（平方、平方根、對數）測試】', () => {
+
+        test('TC-V3-07: 平方運算測試 (5 x² = 25)', () => {
+            appendNumber('5');
+            applyAdvanced('square');
+            expect(document.getElementById('display').innerText).toBe('25');
+        });
+
+        test('TC-V3-08: 平方根運算測試 (9 √ = 3)', () => {
+            appendNumber('9');
+            applyAdvanced('sqrt');
+            expect(document.getElementById('display').innerText).toBe('3');
+        });
+
+        test('TC-V3-09: 常用對數運算測試 (100 log = 2)', () => {
+            appendNumber('100');
+            applyAdvanced('log');
+            expect(document.getElementById('display').innerText).toBe('2');
+        });
+
+        test('TC-V3-10: 針對上一筆計算結果直接進行進階運算 (5 + 4 = 9 -> √ = 3)', () => {
+            appendNumber('5');
+            setOperator('+');
+            appendNumber('4');
+            calculate(); // 畫面上是 '9'
+            applyAdvanced('sqrt'); // 應對前一次的結果 '9' 開根號
+            expect(document.getElementById('display').innerText).toBe('3');
+        });
+    });
+
+    // ==========================================
+    // 4. V3 嚴格錯誤處理與邊界條件測試 (Error Handling)
+    // ==========================================
+    describe('【異常與數學邊界錯誤處理測試】', () => {
+
+        test('TC-V3-11: 數學錯誤：除以零 (8 ÷ 0 = 錯誤)', () => {
+            appendNumber('8');
+            setOperator('/');
+            appendNumber('0');
             calculate();
             expect(document.getElementById('display').innerText).toBe('錯誤');
         });
 
-        test('TC-V1-06: 不完整算式直接按等號（有數字、有符號、無第二數字）應顯示錯誤', () => {
+        test('TC-V3-12: 數學錯誤：對負數開平方根 (√ -9 = 錯誤)', () => {
+            appendNumber('9');
+            setOperator('-'); // 先做成負數（或是輸入負值邏輯）
+            // 這裡模擬使用者產生負數後點選根號
+            // 因專案未實作單純正負號切換，先以減法計算製造負數結果
+            appendNumber('1');
+            setOperator('-');
+            appendNumber('10');
+            calculate(); // 得到 -9
+            applyAdvanced('sqrt');
+            expect(document.getElementById('display').innerText).toBe('錯誤');
+        });
+
+        test('TC-V3-13: 數學錯誤：對小於等於 0 的數取對數 (log 0 = 錯誤)', () => {
+            appendNumber('0');
+            applyAdvanced('log');
+            expect(document.getElementById('display').innerText).toBe('錯誤');
+        });
+
+        test('TC-V3-14: 流程錯誤：算式未完成直接按等號應顯示錯誤', () => {
             appendNumber('7');
             setOperator('+');
             calculate();
-
             expect(document.getElementById('display').innerText).toBe('錯誤');
         });
 
-        test('TC-V1-07: 空畫面下直接點選運算符號不應有任何連帶反應', () => {
-            setOperator('-'); 
-            appendNumber('5');
-            calculate(); 
-            expect(document.getElementById('display').innerText).toBe('錯誤');
-        });
-
-        test('TC-V1-08: 畫面上顯示「錯誤」時，重新輸入數字應自動清除錯誤狀態並顯示新數字', () => {
-            calculate(); 
+        test('TC-V3-15: 錯誤狀態回復：當顯示「錯誤」時，重新輸入數字應自動清除錯誤狀態並顯示新數字', () => {
+            // 製造一個錯誤
+            calculate();
             expect(document.getElementById('display').innerText).toBe('錯誤');
 
-            appendNumber('9'); 
-
+            // 重新輸入數字
+            appendNumber('9');
             expect(document.getElementById('display').innerText).toBe('9');
-        });
-
-        test('TC-V1-09: 數字 0 的邊界輸入處理', () => {
-            appendNumber('0');
-            appendNumber('0');
-            appendNumber('0');
-
-            expect(document.getElementById('display').innerText).toBe('000'); 
-        });
-    });
-
-    // ==========================================
-    // 4. 進階與邏輯重構準備測試套件 (Advanced Logical Tests)
-    // ==========================================
-    describe('【進階複合運算測試】', () => {
-
-        test('TC-V1-10: 負數運算結果測試 (3 - 8 = -5)', () => {
-            appendNumber('3');
-            setOperator('-');
-            appendNumber('8');
-            calculate();
-
-            expect(document.getElementById('display').innerText).toBe('-5');
-        });
-
-        test('TC-V1-11: 運算結果作為下一次運算的起點 (5 + 5 = 10, 10 - 3 = 7)', () => {
-            appendNumber('5');
-            setOperator('+');
-            appendNumber('5');
-            calculate(); 
-            expect(document.getElementById('display').innerText).toBe('10');
-
-            setOperator('-');
-            appendNumber('3');
-            calculate();
-
-            expect(document.getElementById('display').innerText).toBe('7');
         });
     });
 });
