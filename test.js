@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-describe('script(5).js Calculator 單元測試與整合測試', () => {
+describe('script.js Calculator 單元測試與整合測試', () => {
     let Calculator;
     let calculator;
     let registeredDocumentListeners;
@@ -68,11 +68,11 @@ describe('script(5).js Calculator 單元測試與整合測試', () => {
     };
 
     const loadCalculatorClass = () => {
-        const scriptPath = path.join(__dirname, 'script(5).js');
+        const scriptPath = path.join(__dirname, 'script.js');
         const scriptCode = fs.readFileSync(scriptPath, 'utf8');
 
         // 延續 test(1).js 的測試寫法：讀取原始 script，透過 Function 注入測試環境。
-        // script(5).js 使用 class Calculator，因此這裡改為把 Calculator 類別掛到 global。
+        // script.js 使用 class Calculator，因此這裡改為把 Calculator 類別掛到 global。
         const runInGlobal = new Function(`
             with (global) {
                 ${scriptCode}
