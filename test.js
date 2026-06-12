@@ -190,6 +190,50 @@ describe('script.js Calculator 單元測試與整合測試', () => {
             expect(calculator.compute(2, 3, '^')).toBe(8);
         });
 
+        test('TC-S5-U05-1: compute 接收到字串或非數字型態時不應 crash', () => {
+            const abnormalCases = [
+                ['8', '2', '+'],
+                ['abc', 2, '+'],
+                ['', 2, '-'],
+                [undefined, 2, '*'],
+                [null, 2, '/'],
+                [{}, 2, '+'],
+                [[], 2, '/'],
+                [NaN, 2, '^']
+            ];
+
+            abnormalCases.forEach(([first, second, operator]) => {
+                calculator.reset();
+                calculator.render();
+
+                let result;
+                expect(() => {
+                    result = calculator.compute(first, second, operator);
+                }).not.toThrow();
+
+                expect(result === null || typeof result === 'number').toBe(true);
+                expect(displayText()).not.toBe('');
+            });
+        });
+
+        test('TC-S5-U05-2: inputDigit 接收到字串與特殊符號後再計算不應造成程式崩潰', () => {
+            const specialInputs = ['abc', '@@', '中文', '', '1e3'];
+
+            specialInputs.forEach((input) => {
+                calculator.reset();
+                calculator.render();
+
+                expect(() => calculator.inputDigit(input)).not.toThrow();
+                expect(() => {
+                    calculator.chooseOperator('+');
+                    calculator.inputDigit('1');
+                    calculator.calculate();
+                }).not.toThrow();
+
+                expect(displayText()).not.toBe('');
+            });
+        });
+
         test('TC-S5-U06: chooseOperator 與 calculate 應完成一般四則運算', () => {
             calculator.inputDigit('8');
             calculator.chooseOperator('+');
@@ -233,6 +277,8 @@ describe('script.js Calculator 單元測試與整合測試', () => {
             expect(displayText()).toBe('14');
             expect(expressionText()).toBe('7 + 7 =');
         });
+        
+        
     });
 
     // ==========================================
