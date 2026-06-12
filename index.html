@@ -3,40 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>擬真網頁計算機 V3</title>
+    <title>網頁計算機*( ᐡ • ﻌ • ᐡ )*</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="calculator">
-        <div id="display" class="display"></div>
-        
-        <div class="keypad">
-            <button class="adv-operator" onclick="applyAdvanced('square')">x²</button>
-            <button class="adv-operator" onclick="applyAdvanced('sqrt')">√</button>
-            <button class="adv-operator" onclick="applyAdvanced('log')">log</button>
-            <button onclick="clearDisplay()" class="clear">C</button>
+    <main class="page" aria-label="網頁計算機">
+        <section class="calculator-shell" role="application" aria-label="擬真網頁計算機">
+            <div class="device-notch" aria-hidden="true"></div>
 
-            <button onclick="appendNumber('7')">7</button>
-            <button onclick="appendNumber('8')">8</button>
-            <button onclick="appendNumber('9')">9</button>
-            <button class="operator" onclick="setOperator('/')">÷</button>
-            
-            <button onclick="appendNumber('4')">4</button>
-            <button onclick="appendNumber('5')">5</button>
-            <button onclick="appendNumber('6')">6</button>
-            <button class="operator" onclick="setOperator('*')">×</button>
-            
-            <button onclick="appendNumber('1')">1</button>
-            <button onclick="appendNumber('2')">2</button>
-            <button onclick="appendNumber('3')">3</button>
-            <button class="operator" onclick="setOperator('-')">-</button>
-            
-            <button onclick="appendNumber('0')" class="zero">0</button>
-            <button onclick="appendNumber('.')">.</button>
-            <button class="operator" onclick="calculate()">=</button>
-            <button class="operator" onclick="setOperator('+')">+</button>
-        </div>
-    </div>
+            <section class="screen" aria-label="計算顯示區">
+                <div class="screen-toolbar">
+                    <button type="button" class="text-button" data-action="clearHistory" aria-label="清除計算歷史">清除歷史</button>
+                </div>
+                <div id="expression" class="expression" aria-live="polite"></div>
+                <output id="display" class="display" aria-live="assertive">0</output>
+            </section>
+
+            <section class="function-pad" aria-label="進階功能按鍵">
+                <button type="button" class="key function" data-function="square">x²</button>
+                <button type="button" class="key function" data-function="sqrt">√x</button>
+                <button type="button" class="key function" data-function="log">log</button>
+                <button type="button" class="key function" data-function="ln">ln</button>
+
+                <button type="button" class="key function" data-operator="^">xʸ</button>
+                <button type="button" class="key function" data-function="inverse">1/x</button>
+                <button type="button" class="key function" data-symbol="pi">π</button>
+                <button type="button" class="key function" data-action="backspace" aria-label="刪除最後一位">⌫</button>
+            </section>
+
+            <section class="keypad" aria-label="主要計算按鍵">
+                <button type="button" id="clearButton" class="key utility" data-action="clear">AC</button>
+                <button type="button" class="key utility" data-action="sign">±</button>
+                <button type="button" class="key utility" data-action="percent">%</button>
+                <button type="button" class="key operator" data-operator="/" aria-label="除以">÷</button>
+
+                <button type="button" class="key number" data-digit="7">7</button>
+                <button type="button" class="key number" data-digit="8">8</button>
+                <button type="button" class="key number" data-digit="9">9</button>
+                <button type="button" class="key operator" data-operator="*" aria-label="乘以">×</button>
+
+                <button type="button" class="key number" data-digit="4">4</button>
+                <button type="button" class="key number" data-digit="5">5</button>
+                <button type="button" class="key number" data-digit="6">6</button>
+                <button type="button" class="key operator" data-operator="-" aria-label="減去">−</button>
+
+                <button type="button" class="key number" data-digit="1">1</button>
+                <button type="button" class="key number" data-digit="2">2</button>
+                <button type="button" class="key number" data-digit="3">3</button>
+                <button type="button" class="key operator" data-operator="+" aria-label="加上">+</button>
+
+                <button type="button" class="key number zero" data-digit="0">0</button>
+                <button type="button" class="key number" data-action="decimal">.</button>
+                <button type="button" class="key equals" data-action="equals" aria-label="等於">=</button>
+            </section>
+        </section>
+
+        <aside class="history-panel" aria-labelledby="historyTitle">
+            <div class="history-header">
+                <h1 id="historyTitle">計算歷史</h1>
+                <span>最多 8 筆</span>
+            </div>
+            <ol id="historyList" class="history-list">
+                <li class="empty-history">尚無紀錄</li>
+            </ol>
+        </aside>
+    </main>
 
     <script src="script.js"></script>
 </body>
